@@ -13,7 +13,7 @@ def upload_image(s3, image_url):
     response = requests.get(image_url, headers=constants.HEADER)
     image_data = response.content
 
-    fname = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".jpg"
+    fname = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + ".jpg"
     try:
         s3.put_object(
             Bucket=constants.BUCKET_NAME,
@@ -28,7 +28,7 @@ def upload_image(s3, image_url):
 
 
 def upload_text(s3, text):
-    fname = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt"
+    fname = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + ".txt"
     try:
         s3.put_object(Bucket=constants.BUCKET_NAME, Key=fname, Body=text)
     except Exception as e:
