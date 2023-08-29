@@ -1,8 +1,60 @@
+import json
+import pandas as pd
+import pymysql
 import pyrootutils
 
 root_dir = pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-from extras import paths, constants
+from extras import paths, constants, rds_info
 from lmood.utils import utils
+
+
+def connect():
+    json_path = paths.RDS_PASSWORD_PATH
+    with open(json_path) as f:
+        json_object = json.load(f)
+
+    try:
+        conn = pymysql.connect(
+            host=rds_info.host,
+            user=rds_info.user,
+            password=rds_info.password,
+            db=rds_info.db,
+            charset="utf8",
+            port=rds_info.port,
+            autocommit=True,
+            cursorclass=pymysql.cursors.DictCursor,
+        )
+        cursor = conn.cursor()
+    except:
+        logging.error("RDS에 연결되지 않았습니다.")
+        sys.exit(1)
+
+    return conn, cursor
+
+
+def close(conn, cursor):
+    conn.commit()
+    conn.close()
+
+
+def get_product_df(cursor):
+    query = """
+        SELECT * FROM PRODUCT;
+    """
+    cursor.execute(query)
+    products = cursor.fetchall()
+    products_df = pd.DataFrame(products)
+    return products_df
+
+
+def get_product_size_df(cursor, product_id):
+    query = f"""
+        SELECT * FROM SIZE WHERE PRODUCT_ID = {product_id};
+    """
+    cursor.execute(query)
+    size = cursor.fetchall()
+    size_df = pd.DataFrame(size)
+    return size_df
 
 
 def insert_mall(conn, cursor, mall_dict):
@@ -132,3 +184,106 @@ def insert_cat_size(conn, cursor, row, category_id, product_id):
             "dress_id": "NULL",
         }
         insert_size(conn, cursor, size_dict)
+
+
+def update_price(cursor, product_url, new_price):
+    query = f"""
+        UPDATE PRODUCT
+            SET PRICE = {new_price}
+            WHERE URL = '{product_url}'
+    """
+    cursor.execute(query)
+
+
+def update_size(
+    conn, cursor, new_sizes_name, old_sizes_df, size_df, category_id, product_id
+):
+    new_sizes_name_set = set(new_sizes_name)
+    old_sizes_name_set = set(old_sizes_df["NAME"].values)
+
+    add_sizes_name_lst = list(new_sizes_name_set - old_sizes_name_set)
+    rm_sizes_name_lst = list(old_sizes_name_set - new_sizes_name_set)
+
+    if not old_sizes_name_set:
+        delete_ImagePath(cursor, product_id)
+        for rm_size_name in list(old_sizes_name_set):
+            size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                "SIZE_ID"
+            ].values[0]
+            if category_id == 1:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "OUTER_ID"
+                ].values[0]
+            elif category_id == 2:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "TOP_ID"
+                ].values[0]
+            elif category_id == 4:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "BOTTOM_ID"
+                ].values[0]
+            delete_size(cursor, size_id, category_id, category_size_id)
+        delete_product(cursor, product_id)
+
+    if add_sizes_name_lst:
+        for add_size_name in add_sizes_name_lst:
+            try:
+                row = size_df.loc[add_size_name]
+
+                insert_cat_size(conn, cursor, row, category_id, product_id)
+            except KeyError:
+                pass
+
+    if rm_sizes_name_lst:
+        for rm_size_name in rm_sizes_name_lst:
+            size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                "SIZE_ID"
+            ].values[0]
+            if category_id == 1:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "OUTER_ID"
+                ].values[0]
+            elif category_id == 2:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "TOP_ID"
+                ].values[0]
+            elif category_id == 4:
+                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
+                    "BOTTOM_ID"
+                ].values[0]
+            delete_size(cursor, size_id, category_id, category_size_id)
+
+
+def delete_size(cursor, size_id, category_id, category_size_id):
+    query = f"""
+        DELETE FROM SIZE WHERE SIZE_ID = {size_id};
+    """
+    cursor.execute(query)
+
+    if category_id == 1:
+        query = f"""
+            DELETE FROM OUTER_SIZE WHERE OUTER_ID = {category_size_id};
+        """
+    elif category_id == 2:
+        query = f"""
+            DELETE FROM TOP_SIZE WHERE TOP_ID = {category_size_id};
+        """
+    elif category_id == 4:
+        query = f"""
+            DELETE FROM BOTTOM_SIZE WHERE BOTTOM_ID = {category_size_id};
+        """
+    cursor.execute(query)
+
+
+def delete_ImagePath(cursor, product_id):
+    query = f"""
+        DELETE FROM IMAGEPATH WHERE PRODUCT_ID = {product_id};
+    """
+    cursor.execute(query)
+
+
+def delete_product(cursor, product_id):
+    query = f"""
+        DELETE FROM PRODUCT WHERE PRODUCT_ID = {product_id};
+    """
+    cursor.execute(query)

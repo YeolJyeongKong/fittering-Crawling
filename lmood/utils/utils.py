@@ -28,6 +28,8 @@ def table2df(table):
     new_header = df.iloc[0]
     df = df[1:]
     df.columns = new_header
+    if df.index.to_list() == ["46", "46", "48"]:
+        df.index = ["44", "46", "48"]
     return df
 
 
