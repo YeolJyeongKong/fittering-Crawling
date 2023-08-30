@@ -32,11 +32,7 @@ def get_url(product_li):
     return product_url, thumbnail_image_url
 
 
-def get_product_size_name(product_url):
-    response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-
+def get_product_size_name(soup):
     size_li_lst = list(
         filter(
             lambda li: li.select("label")[0].text == "사이즈",
@@ -57,14 +53,17 @@ def get_product_size_name(product_url):
     return sizes_name
 
 
-def get_product_all_size_df(product_url):
-    response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-
+def get_product_all_size_df(soup):
     table = soup.select("div.guideBoard > table")[0]
     size_df = utils.table2df(table)
     return size_df
+
+
+def get_product_price(soup):
+    price = utils.price_str2int(
+        soup.select("div#span_prd_price_sale_text")[0].get_text().strip()
+    )
+    return price
 
 
 def crawling_size(sizes_name, product_id, category_id, soup, conn, cursor):
@@ -101,15 +100,62 @@ def s3_rds_image(product_id, thumbnail_img_url, img_url_lst, s3_obj, conn, curso
         s3_rds_image_(product_id, img_url, s3_obj, conn, cursor, "FALSE")
 
 
+def update_product(product_url, products_df, conn, cursor):
+    response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
+    html = response.text
+    soup = BeautifulSoup(html, "html.parser")
+
+    update = False
+    product_id = products_df[products_df["url"] == product_url]["product_id"].values[0]
+    new_price = get_product_price(soup)
+    old_price = products_df[products_df["url"] == product_url]["price"].values[0]
+    if new_price != old_price:
+        update = True
+        rds.update_price(cursor, product_url, new_price)
+
+    new_sizes_name = get_product_size_name(soup)
+    old_sizes_df = rds.get_product_size_df(cursor, product_id)
+    if old_sizes_df.empty:
+        old_sizes_df = pd.DataFrame(
+            columns=[
+                "SIZE_ID",
+                "NAME",
+                "PRODUCT_ID",
+                "TOP_ID",
+                "OUTER_ID",
+                "BOTTOM_ID",
+                "DRESS_ID",
+            ]
+        )
+    size_df = get_product_all_size_df(soup)
+    category_id = products_df[products_df["url"] == product_url]["category_id"].values[
+        0
+    ]
+    update, disabled = rds.update_size(
+        conn,
+        cursor,
+        new_sizes_name,
+        old_sizes_df,
+        size_df,
+        category_id,
+        product_id,
+        update,
+    )
+    if update:
+        rds.update_product(product_id, disabled, cursor)
+
+
 def crawling_product(product_url, s3_obj, conn, cursor):
-    sizes_name = get_product_size_name(product_url)
-    if not sizes_name:
-        return None, None
     response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
 
     product_dict = {}
+    sizes_name = get_product_size_name(soup)
+    if sizes_name:
+        product_dict["disabled"] = "FALSE"
+    else:
+        product_dict["disabled"] = "TRUE"
 
     product_dict["price"] = utils.price_str2int(
         soup.select("div#span_prd_price_sale_text")[0].get_text().strip()
@@ -127,23 +173,14 @@ def crawling_product(product_url, s3_obj, conn, cursor):
     product_dict["description_path"] = s3.upload_text(s3_obj, text)
 
     product_id = rds.insert_product(conn, cursor, product_dict)
-    crawling_size(
-        sizes_name, product_id, product_dict["category_id"], soup, conn, cursor
-    )
+
+    if sizes_name:
+        crawling_size(
+            sizes_name, product_id, product_dict["category_id"], soup, conn, cursor
+        )
 
     img_url_lst = crawling_image(soup)
     return product_id, img_url_lst
-
-
-def get_product_price(product_url):
-    response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-
-    price = utils.price_str2int(
-        soup.select("div#span_prd_price_sale_text")[0].get_text().strip()
-    )
-    return price
 
 
 def update_page(page_url, products_df, s3_obj, conn, cursor):
@@ -165,43 +202,7 @@ def update_page(page_url, products_df, s3_obj, conn, cursor):
                     product_id, thumbnail_image_url, img_url_lst, s3_obj, conn, cursor
                 )
             else:
-                product_id = products_df[products_df["url"] == product_url][
-                    "product_id"
-                ].values[0]
-                new_price = get_product_price(product_url)
-                old_price = products_df[products_df["url"] == product_url][
-                    "price"
-                ].values[0]
-                if new_price != old_price:
-                    rds.update_price(cursor, product_url, new_price)
-
-                new_sizes_name = get_product_size_name(product_url)
-                old_sizes_df = rds.get_product_size_df(cursor, product_id)
-                if old_sizes_df.empty:
-                    old_sizes_df = pd.DataFrame(
-                        columns=[
-                            "SIZE_ID",
-                            "NAME",
-                            "PRODUCT_ID",
-                            "TOP_ID",
-                            "OUTER_ID",
-                            "BOTTOM_ID",
-                            "DRESS_ID",
-                        ]
-                    )
-                size_df = get_product_all_size_df(product_url)
-                category_id = products_df[products_df["url"] == product_url][
-                    "category_id"
-                ].values[0]
-                rds.update_size(
-                    conn,
-                    cursor,
-                    new_sizes_name,
-                    old_sizes_df,
-                    size_df,
-                    category_id,
-                    product_id,
-                )
+                update_product(product_url, products_df, conn, cursor)
 
         except Exception as e:
             product_url = (

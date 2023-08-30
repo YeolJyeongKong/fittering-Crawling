@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import pandas as pd
 import pymysql
@@ -68,8 +69,8 @@ def insert_mall(conn, cursor, mall_dict):
 
 def insert_product(conn, cursor, product_dict):
     query = f"""
-    INSERT INTO PRODUCT(PRICE, NAME, GENDER, CATEGORY_ID, SUB_CATEGORY_ID, URL, MALL_ID, DESCRIPTION_PATH) 
-        VALUES({product_dict['price']}, '{product_dict['name']}', '{product_dict['gender']}', {product_dict['category_id']}, {product_dict['sub_category_id']}, '{product_dict['url']}', {product_dict['mall_id']}, '{product_dict['description_path']}');
+    INSERT INTO PRODUCT(PRICE, NAME, GENDER, CATEGORY_ID, SUB_CATEGORY_ID, URL, MALL_ID, DESCRIPTION_PATH, T, DISABLED) 
+        VALUES({product_dict['price']}, '{product_dict['name']}', '{product_dict['gender']}', {product_dict['category_id']}, {product_dict['sub_category_id']}, '{product_dict['url']}', {product_dict['mall_id']}, '{product_dict['description_path']}', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', {product_dict['disabled']});
     """
     cursor.execute(query)
     return conn.insert_id()
@@ -186,6 +187,24 @@ def insert_cat_size(conn, cursor, row, category_id, product_id):
         insert_size(conn, cursor, size_dict)
 
 
+def update_product(product_id, disabled, cursor):
+    query = f"""
+        UPDATE PRODUCT
+            SET T = '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', DISABLED = {disabled}
+            WHERE PRODUCT_ID = {product_id}
+    """
+    cursor.execute(query)
+
+
+def update_t(cursor, product_url):
+    query = f"""
+        UPDATE PRODUCT
+            SET T = '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+            WHERE URL = '{product_url}'
+    """
+    cursor.execute(query)
+
+
 def update_price(cursor, product_url, new_price):
     query = f"""
         UPDATE PRODUCT
@@ -196,7 +215,7 @@ def update_price(cursor, product_url, new_price):
 
 
 def update_size(
-    conn, cursor, new_sizes_name, old_sizes_df, size_df, category_id, product_id
+    conn, cursor, new_sizes_name, old_sizes_df, size_df, category_id, product_id, update
 ):
     new_sizes_name_set = set(new_sizes_name)
     old_sizes_name_set = set(old_sizes_df["NAME"].values)
@@ -204,26 +223,12 @@ def update_size(
     add_sizes_name_lst = list(new_sizes_name_set - old_sizes_name_set)
     rm_sizes_name_lst = list(old_sizes_name_set - new_sizes_name_set)
 
-    if not old_sizes_name_set:
-        delete_ImagePath(cursor, product_id)
-        for rm_size_name in list(old_sizes_name_set):
-            size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
-                "SIZE_ID"
-            ].values[0]
-            if category_id == 1:
-                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
-                    "OUTER_ID"
-                ].values[0]
-            elif category_id == 2:
-                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
-                    "TOP_ID"
-                ].values[0]
-            elif category_id == 4:
-                category_size_id = old_sizes_df[old_sizes_df["NAME"] == rm_size_name][
-                    "BOTTOM_ID"
-                ].values[0]
-            delete_size(cursor, size_id, category_id, category_size_id)
-        delete_product(cursor, product_id)
+    disabled = "FALSE"
+    if new_sizes_name_set != old_sizes_name_set:
+        update = "TRUE"
+
+    if not new_sizes_name_set:
+        disabled = "TRUE"
 
     if add_sizes_name_lst:
         for add_size_name in add_sizes_name_lst:
@@ -252,6 +257,7 @@ def update_size(
                     "BOTTOM_ID"
                 ].values[0]
             delete_size(cursor, size_id, category_id, category_size_id)
+    return update, disabled
 
 
 def delete_size(cursor, size_id, category_id, category_size_id):

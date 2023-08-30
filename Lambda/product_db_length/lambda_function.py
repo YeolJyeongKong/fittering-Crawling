@@ -15,9 +15,13 @@ conn = pymysql.connect(
 def handler(event, context):
     cursor = conn.cursor()
     query = """
-    SELECT COUNT(*) FROM PRODUCT
+    SELECT MAX(PRODUCT_ID) FROM PRODUCT
     """
     cursor.execute(query)
     length = cursor.fetchall()[0][0]
 
     return {"statusCode": 200, "body": json.dumps(length)}
+
+
+if __name__ == "__main__":
+    print(handler(None, None))
