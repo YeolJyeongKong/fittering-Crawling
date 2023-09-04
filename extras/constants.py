@@ -20,6 +20,41 @@ SUB2CAT = {
 LMOOD_PAGE_URL = "https://lmood.co.kr/product/list.html?cate_no=198&"
 LMOOD_ROOT_URL = "https://lmood.co.kr"
 LMOOD_ID = 1
+
+LMOOD_CAT_SIZE_COL_NAME = {
+    1: ["총장", "어깨너비", "가슴단면", "소매길이"],
+    2: ["총장", "어깨너비", "가슴단면", "소매길이"],
+    4: ["총장", "허리단면", "허벅지단면", "밑위", "밑단단면"],
+}
+
+LMOOD_CAT_SIZE_ID = {
+    1: "outer_id",
+    2: "top_id",
+    4: "bottom_id",
+}
+
+LMOOD_CAT_SIZE_COL = {
+    1: {
+        "총장": "full",
+        "어깨너비": "shoulder",
+        "가슴단면": "chest",
+        "소매길이": "sleeve",
+    },
+    2: {
+        "총장": "full",
+        "어깨너비": "shoulder",
+        "가슴단면": "chest",
+        "소매길이": "sleeve",
+    },
+    4: {
+        "총장": "full",
+        "허리단면": "waist",
+        "허벅지단면": "thigh",
+        "밑위": "rise",
+        "밑단단면": "bottom_width",
+    },
+}
+
 LMOOD_TOP_SIZE_COL_NAME = ["총장", "어깨너비", "가슴단면", "소매길이"]
 LMOOD_TOP_SIZE_COL = {
     "총장": "full",

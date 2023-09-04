@@ -66,17 +66,41 @@ def get_product_price(soup):
     return price
 
 
-def crawling_size(sizes_name, product_id, category_id, soup, conn, cursor):
+def crawling_size(sizes_name, soup):
     table = soup.select("div.guideBoard > table")[0]
     size_df = utils.table2df(table)
     sizes_name = [
         size_name for size_name in sizes_name if size_name in list(size_df.index)
     ]
     size_df = size_df.loc[sizes_name]
+    return size_df
 
+
+def sizedf2dicts(size_df, category_id):
+    size_dict_lst = []
     for size_name in size_df.index:
         row = size_df.loc[size_name]
-        rds.insert_cat_size(conn, cursor, row, category_id, product_id)
+        size_dict, cat_size_dict = sizerow2dict(row, category_id)
+        size_dict_lst.append([size_dict, cat_size_dict])
+    return size_dict_lst
+
+
+def sizerow2dict(row, category_id):
+    row.index = constants.LMOOD_CAT_SIZE_COL_NAME[category_id]
+    cat_size_dict = {
+        db_col: float(row[df_col])
+        for df_col, db_col in constants.LMOOD_CAT_SIZE_COL[category_id].items()
+    }
+
+    size_dict = {
+        "name": row.name,
+        "product_id": "NULL",
+        "top_id": "NULL",
+        "outer_id": "NULL",
+        "bottom_id": "NULL",
+        "dress_id": "NULL",
+    }
+    return size_dict, cat_size_dict
 
 
 def crawling_image(soup):
@@ -145,7 +169,7 @@ def update_product(product_url, products_df, conn, cursor):
         rds.update_product(product_id, disabled, cursor)
 
 
-def crawling_product(product_url, s3_obj, conn, cursor):
+def crawling_product(product_url):
     response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
@@ -170,17 +194,15 @@ def crawling_product(product_url, s3_obj, conn, cursor):
 
     text = soup.find("p", {"class": "ko"}).find_all(string=True)
     text = "\n".join(list(map(lambda x: x.strip(), text)))
-    product_dict["description_path"] = s3.upload_text(s3_obj, text)
-
-    product_id = rds.insert_product(conn, cursor, product_dict)
 
     if sizes_name:
-        crawling_size(
-            sizes_name, product_id, product_dict["category_id"], soup, conn, cursor
-        )
+        size_df = crawling_size(sizes_name, soup)
+        size_dict_lst = sizedf2dicts(size_df, product_dict["category_id"])
+    else:
+        size_dict_lst = []
 
     img_url_lst = crawling_image(soup)
-    return product_id, img_url_lst
+    return product_dict, size_dict_lst, img_url_lst, text
 
 
 def update_page(page_url, products_df, s3_obj, conn, cursor):
@@ -203,13 +225,13 @@ def update_page(page_url, products_df, s3_obj, conn, cursor):
                 )
             else:
                 update_product(product_url, products_df, conn, cursor)
-
         except Exception as e:
             product_url = (
                 constants.LMOOD_ROOT_URL
                 + product_li.select("div.thumbnail-image > a")[0].attrs["href"]
             )
             print(f"누락된 product url: {product_url}, 누락이유: {e}")
+
     return True
 
 
@@ -223,16 +245,32 @@ def crawling_page(page_url, s3_obj, conn, cursor):
     ):
         try:
             product_url, thumbnail_image_url = search.get_url(product_li)
-            product_id, img_url_lst = search.crawling_product(
-                product_url, s3_obj, conn, cursor
+            product_dict, size_dict_lst, img_url_lst, text = search.crawling_product(
+                product_url
             )
-            if not product_id:
-                continue
+            product_dict["description_path"] = s3.upload_text(s3_obj, text)
+            product_id = rds.insert_product(conn, cursor, product_dict)
+
+            for size_dict, cat_size_dict in size_dict_lst:
+                cat_size_id = rds.insert_cat_size(
+                    conn, cursor, cat_size_dict, product_dict["category_id"]
+                )
+                size_dict["product_id"] = product_id
+                size_dict[
+                    constants.LMOOD_CAT_SIZE_ID[product_dict["category_id"]]
+                ] = cat_size_id
+                rds.insert_size(conn, cursor, size_dict)
 
             search.s3_rds_image(
                 product_id, thumbnail_image_url, img_url_lst, s3_obj, conn, cursor
             )
-        except Exception as e:
+        except ValueError as e:
+            product_url = (
+                constants.LMOOD_ROOT_URL
+                + product_li.select("div.thumbnail-image > a")[0].attrs["href"]
+            )
+            print(f"누락된 product url: {product_url}, 누락이유: {e}")
+        except KeyError as e:
             product_url = (
                 constants.LMOOD_ROOT_URL
                 + product_li.select("div.thumbnail-image > a")[0].attrs["href"]
