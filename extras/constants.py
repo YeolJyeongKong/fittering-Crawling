@@ -79,3 +79,8 @@ LMOOD_BOTTOM_SIZE_COL = {
     "밑위": "rise",
     "밑단단면": "bottom_width",
 }
+
+
+# SLOWAND
+SLOWAND_ROOT_URL = "https://www.slowand.com/"
+SLOWAND_ID = 2
