@@ -1,3 +1,4 @@
+import random
 import requests
 import base64
 import boto3
@@ -28,7 +29,11 @@ def upload_image(s3_obj, image_url):
     response = requests.get(image_url, headers=constants.HEADER)
     image_data = response.content
 
-    fname = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + ".jpg"
+    fname = (
+        datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        + str(random.randint(0, 1000000))
+        + ".jpg"
+    )
     try:
         s3_obj.put_object(
             Bucket=constants.BUCKET_NAME,

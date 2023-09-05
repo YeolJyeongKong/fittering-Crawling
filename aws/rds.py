@@ -104,6 +104,8 @@ def insert_outer_size(conn, cursor, outer_size_dict):
 
 
 def insert_bottom_size(conn, cursor, bottom_size_dict):
+    if "hip_width" not in bottom_size_dict.keys():
+        bottom_size_dict["hip_width"] = "NULL"
     query = f"""
     INSERT INTO BOTTOM_SIZE (FULL, WAIST, THIGH, RISE, BOTTOM_WIDTH, HIP_WIDTH) 
         VALUES({bottom_size_dict['full']}, {bottom_size_dict['waist']}, {bottom_size_dict['thigh']}, {bottom_size_dict['rise']}, {bottom_size_dict['bottom_width']}, {bottom_size_dict['hip_width']})
@@ -130,61 +132,15 @@ def insert_size(conn, cursor, size_dict):
     return conn.insert_id()
 
 
-def insert_cat_size(conn, cursor, row, category_id, product_id):
+def insert_cat_size(conn, cursor, cat_size_dict, category_id):
     if category_id == 2:
-        row.index = constants.LMOOD_TOP_SIZE_COL_NAME
-        top_size_dict = {
-            db_col: float(row[df_col])
-            for df_col, db_col in constants.LMOOD_TOP_SIZE_COL.items()
-        }
-        top_size_id = insert_top_size(conn, cursor, top_size_dict)
-
-        size_dict = {
-            "name": row.name,
-            "product_id": product_id,
-            "top_id": top_size_id,
-            "outer_id": "NULL",
-            "bottom_id": "NULL",
-            "dress_id": "NULL",
-        }
-        insert_size(conn, cursor, size_dict)
+        return insert_top_size(conn, cursor, cat_size_dict)
 
     elif category_id == 1:
-        row.index = constants.LMOOD_OUTER_SIZE_COL_NAME
-        outer_size_dict = {
-            db_col: float(row[df_col])
-            for df_col, db_col in constants.LMOOD_OUTER_SIZE_COL.items()
-        }
-        outer_size_id = insert_outer_size(conn, cursor, outer_size_dict)
-
-        size_dict = {
-            "name": row.name,
-            "product_id": product_id,
-            "top_id": "NULL",
-            "outer_id": outer_size_id,
-            "bottom_id": "NULL",
-            "dress_id": "NULL",
-        }
-        insert_size(conn, cursor, size_dict)
+        return insert_outer_size(conn, cursor, cat_size_dict)
 
     elif category_id == 4:
-        row.index = constants.LMOOD_BOTTOM_SIZE_COL_NAME
-        bottom_size_dict = {
-            db_col: float(row[df_col])
-            for df_col, db_col in constants.LMOOD_BOTTOM_SIZE_COL.items()
-        }
-        bottom_size_dict["hip_width"] = "NULL"
-        bottom_size_id = insert_bottom_size(conn, cursor, bottom_size_dict)
-
-        size_dict = {
-            "name": row.name,
-            "product_id": product_id,
-            "top_id": "NULL",
-            "outer_id": "NULL",
-            "bottom_id": bottom_size_id,
-            "dress_id": "NULL",
-        }
-        insert_size(conn, cursor, size_dict)
+        return insert_bottom_size(conn, cursor, cat_size_dict)
 
 
 def update_product(product_id, disabled, cursor):
