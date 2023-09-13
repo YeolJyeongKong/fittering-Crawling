@@ -60,8 +60,8 @@ def get_product_size_df(cursor, product_id):
 
 def insert_mall(conn, cursor, mall_dict):
     query = f"""
-    INSERT INTO MALL (NAME, URL, DESCRIPTION, IMAGE) 
-        VALUES('{mall_dict['name']}', '{mall_dict['url']}', '{mall_dict['description']}', '{mall_dict['image']}');
+    INSERT INTO MALL (MALL_ID, NAME, URL, DESCRIPTION, IMAGE) 
+        VALUES({mall_dict['mall_id']}, '{mall_dict['name']}', '{mall_dict['url']}', '{mall_dict['description']}', '{mall_dict['image']}');
     """
     cursor.execute(query)
     return conn.insert_id()

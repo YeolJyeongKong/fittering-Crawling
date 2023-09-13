@@ -81,6 +81,25 @@ LMOOD_BOTTOM_SIZE_COL = {
 }
 
 
-# SLOWAND
-SLOWAND_ROOT_URL = "https://www.slowand.com/"
-SLOWAND_ID = 2
+# DAILYJOU
+DAILYJOU_ROOT_URL = "https://dailyjou.com"
+DAILYJOU_ID = 2
+
+DAILYJOU_CAT_SIZE_ID = {
+    1: "outer_id",
+    2: "top_id",
+    3: "dress_id",
+    4: "bottom_id",
+}
+DAILYJOU_CAT_SIZE_COL_NAME_DICT = {
+    "총기장": "총길이",
+}
+
+DAILYJOU_TOP_PAGE_URL = "https://dailyjou.com/product/list.html?cate_no=46"
+DAILYJOU_TOP_SIZE_COL_NAME = ["총길이", "어깨", "가슴", "소매길이"]
+DAILYJOU_TOP_SIZE_COL2KEY = {
+    "총길이": "full",
+    "어깨": "shoulder",
+    "가슴": "chest",
+    "소매길이": "sleeve",
+}
