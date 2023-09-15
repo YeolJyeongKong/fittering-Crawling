@@ -95,11 +95,35 @@ DAILYJOU_CAT_SIZE_COL_NAME_DICT = {
     "총기장": "총길이",
 }
 
-DAILYJOU_TOP_PAGE_URL = "https://dailyjou.com/product/list.html?cate_no=46"
+DAILYJOU_SUBCATEGORY2PAGE_URL = {
+    9: ["https://dailyjou.com/product/list.html?cate_no=46"],
+    10: ["https://dailyjou.com/product/list.html?cate_no=89"],
+    8: ["https://dailyjou.com/product/list.html?cate_no=55"],
+    7: [
+        "https://dailyjou.com/product/list.html?cate_no=51",
+        "https://dailyjou.com/product/list.html?cate_no=47",
+    ],
+    12: [
+        "https://dailyjou.com/product/list.html?cate_no=148",
+        "https://dailyjou.com/product/list.html?cate_no=150",
+        "https://dailyjou.com/product/list.html?cate_no=82",
+        "https://dailyjou.com/product/list.html?cate_no=84",
+        "https://dailyjou.com/product/list.html?cate_no=85",
+    ],
+}
 DAILYJOU_TOP_SIZE_COL_NAME = ["총길이", "어깨", "가슴", "소매길이"]
 DAILYJOU_TOP_SIZE_COL2KEY = {
     "총길이": "full",
     "어깨": "shoulder",
     "가슴": "chest",
     "소매길이": "sleeve",
+}
+
+DAILYJOU_BOTTOM_SIZE_COL2KEY = {
+    "총길이": "full",
+    "허리": "waist",
+    "허벅지": "thigh",
+    "밑위": "rise",
+    "밑단": "bottom_width",
+    "엉덩이": "hip_width",
 }

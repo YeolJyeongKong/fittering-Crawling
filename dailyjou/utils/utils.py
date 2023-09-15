@@ -53,7 +53,16 @@ def df2size_dict_lst(size_df, category_id):
                         cat_size_dict[key] = float(row[col])
                     except ValueError:
                         cat_size_dict[key] = size_value_process(row[col])
-
+            size_dict_lst += [[size_dict, cat_size_dict]]
+        elif category_id == 4:
+            for col, key in constants.DAILYJOU_BOTTOM_SIZE_COL2KEY.items():
+                if col not in row.index:
+                    cat_size_dict[key] = "NULL"
+                else:
+                    try:
+                        cat_size_dict[key] = float(row[col])
+                    except ValueError:
+                        cat_size_dict[key] = size_value_process(row[col])
             size_dict_lst += [[size_dict, cat_size_dict]]
     return size_dict_lst
 
@@ -81,6 +90,21 @@ def size_value_process(size_value):
     if "최소" in size_value:
         pattern = r"(\d+\.\d+)\(최소\)\/(\d+)\(최대\)"
         input_text = re.sub(pattern, replace_average, size_value)
+    elif "펼쳤을때" in size_value:
+        s_lst = size_value.split("/")
+        input_text = s_lst[0]
+    elif "~" in size_value:
+        s_lst = size_value.split("~")
+        s_lst = [del_round(s) for s in s_lst]
+        return (float(s_lst[0]) + float(s_lst[1])) / 2
+    elif "/" in size_value:
+        s_lst = size_value.split("/")
+        s_lst = [del_round(s) for s in s_lst]
+        return (float(s_lst[0]) + float(s_lst[1])) / 2
+    elif "-" in size_value:
+        s_lst = size_value.split("-")
+        s_lst = [del_round(s) for s in s_lst]
+        return (float(s_lst[0]) + float(s_lst[1])) / 2
     elif "긴소매" in size_value:
         pattern = r"\d+\(긴소매\)"
         matches = re.search(pattern, size_value)
@@ -93,6 +117,10 @@ def size_value_process(size_value):
     elif "" == size_value:
         return "NULL"
     else:
-        pattern = r"\([^)]*\)"
-        input_text = re.sub(pattern, "", size_value)
+        input_text = del_round(size_value)
     return float(input_text)
+
+
+def del_round(text):
+    pattern = r"\([^)]*\)"
+    return re.sub(pattern, "", text)

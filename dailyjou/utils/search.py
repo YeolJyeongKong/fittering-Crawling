@@ -1,5 +1,7 @@
 import re
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import pyrootutils
@@ -72,7 +74,7 @@ def get_size_dict_lst(soup, category_id):
     return size_dict_lst
 
 
-def crawling_product(product_url):
+def crawling_product(subcategory_id, product_url):
     response = requests.get(product_url, headers={"User-Agent": "Mozilla/5.0"})
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
@@ -85,7 +87,7 @@ def crawling_product(product_url):
         "div.xans-element-.xans-product.xans-product-detaildesign > table > tbody > tr.xans-record- > td > span"
     ).text
     product_dict["gender"] = "F"
-    product_dict["sub_category_id"] = 9
+    product_dict["sub_category_id"] = subcategory_id
     product_dict["category_id"] = constants.SUB2CAT[product_dict["sub_category_id"]]
     product_dict["url"] = product_url
     product_dict["mall_id"] = constants.DAILYJOU_ID
@@ -97,18 +99,20 @@ def crawling_product(product_url):
     return product_dict, size_dict_lst, img_url_lst
 
 
-def crawling_page(page_url, s3_obj, conn, cursor):
+def crawling_page(subcategory_id, page_url, s3_obj, conn, cursor):
     product_li_lst = get_product_li(page_url)
 
     if not product_li_lst:
         return False
 
     for product_li in tqdm(
-        product_li_lst, total=len(product_li_lst), desc="crawling page"
+        product_li_lst, total=len(product_li_lst), desc=f"crawling page {page_url}"
     ):
         try:
             product_url, thumbnail_image_url = get_url(product_li)
-            product_dict, size_dict_lst, img_url_lst = crawling_product(product_url)
+            product_dict, size_dict_lst, img_url_lst = crawling_product(
+                subcategory_id, product_url
+            )
             if not product_dict:
                 print(f"pass product url: {product_url}")
                 continue
@@ -131,5 +135,9 @@ def crawling_page(page_url, s3_obj, conn, cursor):
         except TypeError as e:
             print(f"error: {e} | product_url: {product_url}")
         except requests.exceptions.InvalidURL as e:
+            print(f"error: {e} | product_url: {product_url}")
+        except requests.exceptions.ConnectionError as e:
+            print(f"error: {e} | product_url: {product_url}")
+        except ValueError as e:
             print(f"error: {e} | product_url: {product_url}")
     return True
