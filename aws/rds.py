@@ -60,8 +60,8 @@ def get_product_size_df(cursor, product_id):
 
 def insert_mall(conn, cursor, mall_dict):
     query = f"""
-    INSERT INTO MALL (NAME, URL, DESCRIPTION, IMAGE) 
-        VALUES('{mall_dict['name']}', '{mall_dict['url']}', '{mall_dict['description']}', '{mall_dict['image']}');
+    INSERT INTO MALL (MALL_ID, NAME, URL, DESCRIPTION, IMAGE) 
+        VALUES({mall_dict['mall_id']}, '{mall_dict['name']}', '{mall_dict['url']}', '{mall_dict['description']}', '{mall_dict['image']}');
     """
     cursor.execute(query)
     return conn.insert_id()
@@ -117,7 +117,7 @@ def insert_bottom_size(conn, cursor, bottom_size_dict):
 def insert_dress_size(conn, cursor, dress_size_dict):
     query = f"""
     INSERT INTO DRESS_SIZE (FULL, SHOULDER, WAIST, THIGH, ARM_HALL, HIP, SLEEVE, SLEEVE_WIDTH, BOTTOM_WIDTH)
-        VALUES({dress_size_dict['full']}, {dress_size_dict['shoulder']}, {dress_size_dict['waist']}, {dress_size_dict['thigh']}, {dress_size_dict['arm_hall']}, {dress_size_dict['hip']}, {dress_size_dict['sleeve']}, {dress_size_dict['sleeve_width']}, {dress_size_dict['bottom_width']})
+        VALUES({dress_size_dict['full']}, {dress_size_dict['shoulder']}, {dress_size_dict['waist']}, {dress_size_dict['thigh']}, {dress_size_dict['arm_hall']}, {dress_size_dict['hip_width']}, {dress_size_dict['sleeve']}, {dress_size_dict['sleeve_width']}, {dress_size_dict['bottom_width']})
     """
     cursor.execute(query)
     return conn.insert_id()
@@ -141,6 +141,9 @@ def insert_cat_size(conn, cursor, cat_size_dict, category_id):
 
     elif category_id == 4:
         return insert_bottom_size(conn, cursor, cat_size_dict)
+
+    elif category_id == 3:
+        return insert_dress_size(conn, cursor, cat_size_dict)
 
 
 def update_product(product_id, disabled, cursor):
