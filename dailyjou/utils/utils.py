@@ -64,6 +64,26 @@ def df2size_dict_lst(size_df, category_id):
                     except ValueError:
                         cat_size_dict[key] = size_value_process(row[col])
             size_dict_lst += [[size_dict, cat_size_dict]]
+        elif category_id == 3:
+            for col, key in constants.DAILYJOU_DRESS_SIZE_COL2KEY.items():
+                if col not in row.index:
+                    cat_size_dict[key] = "NULL"
+                else:
+                    try:
+                        cat_size_dict[key] = float(row[col])
+                    except ValueError:
+                        cat_size_dict[key] = size_value_process(row[col])
+            size_dict_lst += [[size_dict, cat_size_dict]]
+        elif category_id == 1:
+            for col, key in constants.DAILYJOU_OUTER_SIZE_COL2KEY.items():
+                if col not in row.index:
+                    cat_size_dict[key] = "NULL"
+                else:
+                    try:
+                        cat_size_dict[key] = float(row[col])
+                    except ValueError:
+                        cat_size_dict[key] = size_value_process(row[col])
+            size_dict_lst += [[size_dict, cat_size_dict]]
     return size_dict_lst
 
 
@@ -88,8 +108,10 @@ def replace_average(match):
 
 def size_value_process(size_value):
     if "최소" in size_value:
-        pattern = r"(\d+\.\d+)\(최소\)\/(\d+)\(최대\)"
-        input_text = re.sub(pattern, replace_average, size_value)
+        matches = re.findall(r"(\d+\.\d+|\d+)\(최대\)|(\d+\.\d+|\d+)\(최소\)", size_value)
+        numbers = [float(match[0] if match[0] else match[1]) for match in matches]
+        average = sum(numbers) / len(numbers)
+        return average
     elif "펼쳤을때" in size_value:
         s_lst = size_value.split("/")
         input_text = s_lst[0]
@@ -124,3 +146,16 @@ def size_value_process(size_value):
 def del_round(text):
     pattern = r"\([^)]*\)"
     return re.sub(pattern, "", text)
+
+
+def name2subcategory(name):
+    if "후드 집업" in name or "후드집업" in name:
+        return 1
+    if "점퍼" in name:
+        return 6
+    if "패딩" in name:
+        return 4
+    if "자켓" in name:
+        return 5
+    else:
+        return 6

@@ -1,7 +1,5 @@
 import re
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import pyrootutils
@@ -86,6 +84,8 @@ def crawling_product(subcategory_id, product_url):
     product_dict["name"] = soup.select_one(
         "div.xans-element-.xans-product.xans-product-detaildesign > table > tbody > tr.xans-record- > td > span"
     ).text
+    if subcategory_id == 6:
+        subcategory_id = utils.name2subcategory(product_dict["name"])
     product_dict["gender"] = "F"
     product_dict["sub_category_id"] = subcategory_id
     product_dict["category_id"] = constants.SUB2CAT[product_dict["sub_category_id"]]

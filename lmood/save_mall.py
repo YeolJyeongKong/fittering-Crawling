@@ -13,6 +13,7 @@ if __name__ == "__main__":
 
     conn, cursor = rds.connect()
     mall_dict = {
+        "mall_id": 1,
         "name": "엘무드",
         "url": "https://lmood.co.kr/index.html",
         "description": "엘무드(LMOOD)는 미니멀과 컴포트를 중점으로 이 시대 트렌드를 반영한 컨템포러리 감성 브랜드입니다.",
