@@ -152,6 +152,9 @@ def get_image_body(img_url):
     if img_url.endswith(".jpg"):
         extension = ".jpg"
         content_type = "image/jpg"
+    elif img_url.endswith(".png"):
+        extension = ".png"
+        content_type = "image/png"
     elif img_url.endswith(".gif"):
         extension = ".gif"
         content_type = "image/jpg"

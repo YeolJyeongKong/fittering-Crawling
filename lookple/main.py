@@ -13,7 +13,7 @@ def main():
         subcategory_id,
         subcategory_url_lst,
     ) in constants.LOOKPLE_SUBCATEGORY2PAGE_URL.items():
-        if subcategory_id != 7:
+        if subcategory_id != 12:
             continue
 
         for subcategory_url in subcategory_url_lst:

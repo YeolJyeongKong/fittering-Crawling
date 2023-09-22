@@ -84,6 +84,8 @@ def text2sizedf(text):
 
 
 def is_english(text):
+    if text in ["2XL", "3XL", "4XL"]:
+        return True
     return text.encode().isalpha()
 
 

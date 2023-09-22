@@ -198,11 +198,11 @@ LOOKPLE_SUBCATEGORY2PAGE_URL = {
         "https://lookple.com/category/%EC%B2%B4%ED%81%AC%ED%8C%A8%ED%84%B4/103/",
     ],
     12: [
-        "https://dailyjou.com/product/list.html?cate_no=148",
-        "https://dailyjou.com/product/list.html?cate_no=150",
-        "https://dailyjou.com/product/list.html?cate_no=82",
-        "https://dailyjou.com/product/list.html?cate_no=84",
-        "https://dailyjou.com/product/list.html?cate_no=85",
+        "https://lookple.com/category/%EC%8A%AC%EB%9E%99%EC%8A%A4/71/",
+        "https://lookple.com/category/%EC%B2%AD%EB%B0%94%EC%A7%80/73/",
+        "https://lookple.com/category/%EB%A9%B4%EB%B0%94%EC%A7%80%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%8B%9D/72/",
+        "https://lookple.com/category/%EB%B0%98%EB%B0%94%EC%A7%80/100/",
+        "https://lookple.com/category/%EB%B0%B4%EB%94%A9%EB%B0%94%EC%A7%80/149/",
     ],
     13: ["https://dailyjou.com/product/list.html?cate_no=48"],
     11: ["https://dailyjou.com/product/list.html?cate_no=80"],
@@ -220,7 +220,7 @@ LOOKPLE_TOP_SIZE_COL2KEY = {
 }
 
 LOOKPLE_BOTTOM_SIZE_COL2KEY = {
-    "총길이": "full",
+    "총장": "full",
     "허리": "waist",
     "허벅지": "thigh",
     "밑위": "rise",
