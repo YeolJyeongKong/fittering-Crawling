@@ -1,3 +1,5 @@
+import sys
+import logging
 from datetime import datetime
 import json
 import pandas as pd
@@ -10,10 +12,6 @@ from lmood.utils import utils
 
 
 def connect():
-    json_path = paths.RDS_PASSWORD_PATH
-    with open(json_path) as f:
-        json_object = json.load(f)
-
     try:
         conn = pymysql.connect(
             host=rds_info.host,
@@ -38,9 +36,9 @@ def close(conn, cursor):
     conn.close()
 
 
-def get_product_df(cursor):
-    query = """
-        SELECT * FROM PRODUCT;
+def get_product_df(cursor, mall_id=1):
+    query = f"""
+        SELECT * FROM PRODUCT WHERE MALL_ID = {mall_id};
     """
     cursor.execute(query)
     products = cursor.fetchall()
@@ -151,6 +149,15 @@ def update_product(product_id, disabled, cursor):
         UPDATE PRODUCT
             SET T = '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', DISABLED = {disabled}
             WHERE PRODUCT_ID = {product_id}
+    """
+    cursor.execute(query)
+
+
+def update_price_t(cursor, product_url, new_price):
+    query = f"""
+        UPDATE PRODUCT
+            SET PRICE = {new_price}, T = '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+            WHERE URL = '{product_url}'
     """
     cursor.execute(query)
 

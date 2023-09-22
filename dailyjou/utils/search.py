@@ -126,7 +126,7 @@ def crawling_page(subcategory_id, page_url, s3_obj, conn, cursor):
                 size_dict["product_id"] = product_id
 
                 size_dict[
-                    constants.DAILYJOU_CAT_SIZE_ID[product_dict["category_id"]]
+                    constants.CAT_SIZE_ID[product_dict["category_id"]]
                 ] = cat_size_id
                 rds.insert_size(conn, cursor, size_dict)
             utils.s3_rds_image(
