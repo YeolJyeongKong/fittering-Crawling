@@ -72,6 +72,8 @@ def crawling_product(subcategory_id, product_url):
     product_dict["price"] = get_price(info_df)
     product_dict["name"] = info_df.loc["상품명", 1].strip()
     product_dict["gender"] = "M"
+    if subcategory_id == 6:
+        subcategory_id = utils.name2subcategory(product_dict["name"])
     product_dict["sub_category_id"] = subcategory_id
     product_dict["category_id"] = constants.SUB2CAT[product_dict["sub_category_id"]]
     product_dict["url"] = product_url

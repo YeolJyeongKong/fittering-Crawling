@@ -204,12 +204,16 @@ LOOKPLE_SUBCATEGORY2PAGE_URL = {
         "https://lookple.com/category/%EB%B0%98%EB%B0%94%EC%A7%80/100/",
         "https://lookple.com/category/%EB%B0%B4%EB%94%A9%EB%B0%94%EC%A7%80/149/",
     ],
-    13: ["https://dailyjou.com/product/list.html?cate_no=48"],
-    11: ["https://dailyjou.com/product/list.html?cate_no=80"],
-    3: ["https://dailyjou.com/product/list.html?cate_no=44"],
-    6: ["https://dailyjou.com/product/list.html?cate_no=45"],
-    2: ["https://dailyjou.com/product/list.html?cate_no=52"],
-    5: ["https://dailyjou.com/product/list.html?cate_no=53"],
+    # 13: ["https://dailyjou.com/product/list.html?cate_no=48"],
+    # 11: ["https://dailyjou.com/product/list.html?cate_no=80"],
+    6: [
+        "https://lookple.com/category/%EC%A0%90%ED%8D%BC/115/",
+        "https://lookple.com/category/%EB%A0%88%EB%8D%94/121/",
+    ],
+    2: ["https://lookple.com/category/%EC%BD%94%ED%8A%B8/46/"],
+    3: ["https://lookple.com/category/%EA%B0%80%EB%94%94%EA%B1%B4/129/"],
+    4: ["https://lookple.com/category/%ED%8C%A8%EB%94%A9/47/"],
+    5: ["https://lookple.com/category/%EC%9E%90%EC%BC%93/45/"],
 }
 
 LOOKPLE_TOP_SIZE_COL2KEY = {
@@ -241,8 +245,8 @@ LOOKPLE_DRESS_SIZE_COL2KEY = {
 }
 
 LOOKPLE_OUTER_SIZE_COL2KEY = {
-    "총길이": "full",
+    "총장": "full",
     "어깨": "shoulder",
     "가슴": "chest",
-    "소매길이": "sleeve",
+    "소매": "sleeve",
 }
