@@ -1,4 +1,5 @@
 S3_BUCKET_NAME = "fittering-images-bucket"
+# S3_BUCKET_NAME = "fittering-crawling-image"
 S3_PATH = "images/"
 HEADER = {"User-Agent": "Mozilla/5.0"}
 SUB2CAT = {
@@ -30,7 +31,6 @@ CAT_SIZE_NOT_NULL_COL = {
     2: ["full", "chest"],
     3: [
         "full",
-        "bottom_width",
     ],
     4: [
         "full",
@@ -249,4 +249,82 @@ LOOKPLE_OUTER_SIZE_COL2KEY = {
     "어깨": "shoulder",
     "가슴": "chest",
     "소매": "sleeve",
+}
+
+
+# ----------------------merryaround----------------------
+MERRYAROUND_ROOT_URL = "https://merryaround.co.kr"
+MERRYAROUND_ID = 4
+
+MERRYAROUND_SUBCATEGORY2PAGE_URL = {
+    # 9: ["http://merryaround.co.kr/category/tee/140/"],
+    # 10: ["https://merryaround.co.kr/category/mtm-hoody/142/"],
+    # 8: [
+    #     "https://merryaround.co.kr/category/knit/127/",
+    #     "https://merryaround.co.kr/category/vest/129/",
+    # ],
+    # 7: [
+    #     "https://merryaround.co.kr/category/blouse/145/",
+    #     "https://merryaround.co.kr/category/shirt/144/",
+    # ],
+    12: [
+        "https://merryaround.co.kr/category/denim/222/",
+        "https://merryaround.co.kr/category/cottonslacks/189/",
+        "https://merryaround.co.kr/category/shorts/307/",
+    ],
+    13: [
+        "https://merryaround.co.kr/category/long/149/",
+        "https://merryaround.co.kr/category/mini/150/",
+    ],
+    11: [
+        "https://merryaround.co.kr/category/long/148/",
+        "https://merryaround.co.kr/category/mini/147/",
+    ],
+    # 1:
+    2: ["https://merryaround.co.kr/category/coat/135/"],
+    3: ["https://merryaround.co.kr/category/cardigan/128/"],
+    # 4: []
+    5: [
+        "https://merryaround.co.kr/category/jacket/136/",
+        "https://merryaround.co.kr/category/tweed/471/",
+    ],
+    6: [
+        "https://merryaround.co.kr/category/jumper/137/",
+        "https://merryaround.co.kr/category/mustang/139/",
+    ],
+}
+
+MERRYAROUND_TOP_SIZE_COL2KEY = {
+    "총장": "full",
+    "어깨": "shoulder",
+    "가슴": "chest",
+    "소매길이": "sleeve",
+}
+
+MERRYAROUND_BOTTOM_SIZE_COL2KEY = {
+    "총장": "full",
+    "허리": "waist",
+    "허벅지": "thigh",
+    "밑위": "rise",
+    "밑단": "bottom_width",
+    "엉덩이": "hip_width",
+}
+
+MERRYAROUND_DRESS_SIZE_COL2KEY = {
+    "총장": "full",
+    "어깨": "shoulder",
+    "허리": "waist",
+    "허벅지": "thigh",
+    "암홀": "arm_hall",
+    "엉덩이": "hip_width",
+    "소매길이": "sleeve",
+    "소매단면": "sleeve_width",
+    "밑단": "bottom_width",
+}
+
+MERRYAROUND_OUTER_SIZE_COL2KEY = {
+    "총장": "full",
+    "어깨": "shoulder",
+    "가슴": "chest",
+    "소매길이": "sleeve",
 }

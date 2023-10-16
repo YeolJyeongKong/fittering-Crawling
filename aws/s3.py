@@ -11,17 +11,7 @@ from extras import paths, constants
 
 
 def connect():
-    try:
-        s3_access_key = pd.read_csv(paths.S3_ACCESS_KEY_PATH)
-        s3_obj = boto3.client(
-            "s3",
-            aws_access_key_id=s3_access_key["Access key ID"].values[0],
-            aws_secret_access_key=s3_access_key["Secret access key"].values[0],
-            region_name="ap-northeast-2",
-        )
-    except:
-        s3_obj = boto3.client("s3")
-
+    s3_obj = boto3.client("s3")
     return s3_obj
 
 
